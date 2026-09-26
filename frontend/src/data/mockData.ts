@@ -3,6 +3,8 @@ import type {
   AnalysisData,
   ProjectOverviewData,
   ArchitectureData,
+  OnboardingJourneyData,
+  TaskVerificationData,
 } from '../types';
 
 export const RECENT_REPOSITORIES: Repository[] = [
@@ -486,4 +488,236 @@ export const DEMO_ARCHITECTURE_DATA: ArchitectureData = {
       coords: { x: 94, y: 62 },
     },
   ],
+};
+
+export const DEMO_ONBOARDING_JOURNEY: OnboardingJourneyData = {
+  repository: RECENT_REPOSITORIES[0],
+  totalTasks: 6,
+  completedTasks: 3,
+  inProgressTasks: 1,
+  upcomingTasks: 2,
+  progressPercent: 50,
+  estimatedTotalMinutes: 28,
+  nextCheckpoint: 'API Request Tracing',
+  currentTask: {
+    id: '04',
+    slug: 'api-request-flow',
+    number: '04',
+    title: 'Understand the API Request Flow',
+    description:
+      'Trace how a request moves from the React frontend through the FastAPI layer and into the service and database layers.',
+    status: 'in_progress',
+    estimatedMinutes: 10,
+    difficulty: 'Intermediate',
+    category: 'API · Architecture',
+    tag: 'Current',
+    checkpointNote: 'Requires completion to unlock 05',
+  },
+  tasks: [
+    {
+      id: '01',
+      slug: 'project-structure',
+      number: '01',
+      title: 'Project Structure',
+      description: 'Understand the repository layout and identify the major application areas.',
+      status: 'completed',
+      estimatedMinutes: 5,
+      verifiedNote: 'Verified ✓',
+    },
+    {
+      id: '02',
+      slug: 'application-architecture',
+      number: '02',
+      title: 'Application Architecture',
+      description: 'Explore how the frontend, API, services, and database interact.',
+      status: 'completed',
+      estimatedMinutes: 8,
+      verifiedNote: 'Verified ✓',
+    },
+    {
+      id: '03',
+      slug: 'authentication',
+      number: '03',
+      title: 'Authentication',
+      description: 'Understand authentication, authorization, and protected application flows.',
+      status: 'completed',
+      estimatedMinutes: 10,
+      verifiedNote: 'Verified ✓',
+    },
+    {
+      id: '04',
+      slug: 'api-request-flow',
+      number: '04',
+      title: 'API Request Flow',
+      description: 'Trace a request from the frontend through the backend and service layer.',
+      status: 'in_progress',
+      estimatedMinutes: 10,
+      difficulty: 'Intermediate',
+      category: 'API · Architecture',
+      tag: 'Current',
+      checkpointNote: 'Requires completion to unlock 05',
+    },
+    {
+      id: '05',
+      slug: 'database-data-model',
+      number: '05',
+      title: 'Database & Data Model',
+      description: 'Understand the main database models and how application data is persisted.',
+      status: 'locked',
+      estimatedMinutes: 8,
+      tag: 'Locked',
+      checkpointNote: 'Requires completion of 04',
+    },
+    {
+      id: '06',
+      slug: 'final-verification',
+      number: '06',
+      title: 'Final Repository Verification',
+      description:
+        "Demonstrate your understanding of the project's architecture and development workflow.",
+      status: 'locked',
+      estimatedMinutes: 10,
+      tag: 'Final Capstone',
+      checkpointNote: 'Requires completion of 05',
+    },
+  ],
+  keyFiles: [
+    { path: 'src/api/', role: 'Frontend API client' },
+    { path: 'app/api/', role: 'FastAPI route declarations' },
+    { path: 'app/services/', role: 'Core domain logic' },
+    { path: 'app/models/', role: 'SQLAlchemy entities' },
+  ],
+  requestLifecycle: [
+    'Frontend (React UI)',
+    'API Layer (FastAPI Routers)',
+    'Event Service (Domain Business)',
+    'Database (PostgreSQL)',
+  ],
+  competencies: [
+    {
+      id: 'architecture',
+      title: 'Architecture',
+      description:
+        'How the major parts of the system connect and exchange messages across boundaries.',
+      icon: 'architecture',
+    },
+    {
+      id: 'apis',
+      title: 'APIs',
+      description:
+        'How requests move through application routing, middleware, and domain controllers.',
+      icon: 'api',
+    },
+    {
+      id: 'data',
+      title: 'Data',
+      description:
+        'How information is schema-defined, persisted, migrated, and cached at runtime.',
+      icon: 'data',
+    },
+    {
+      id: 'workflow',
+      title: 'Workflow',
+      description:
+        'How developers run tests, execute local builds, and contribute production PRs.',
+      icon: 'workflow',
+    },
+  ],
+  checkpointPreview:
+    'Code tracing test & endpoint dependency mapping across 3 core routes.',
+};
+
+export const DEMO_TASK_VERIFICATION: TaskVerificationData = {
+  taskId: 'api-request-flow',
+  taskNumber: 'TASK 04 OF 06',
+  title: 'Understand the API Request Flow',
+  description:
+    'Trace how a user action moves from the frontend through the API and service layers before reaching the database.',
+  difficulty: 'Intermediate',
+  estimatedTime: '~10 min',
+  category: 'API · Architecture',
+  overallProgress: {
+    completed: 3,
+    total: 6,
+    percent: 50,
+  },
+  branch: 'main',
+  commitHash: 'a4c89f2',
+  pipelineSteps: [
+    {
+      step: '01',
+      label: '01 CLIENT',
+      title: 'React Frontend',
+      description: 'Dispatches registration action via fetch helper.',
+      filePath: 'src/api/events.ts',
+      icon: 'devices',
+    },
+    {
+      step: '02',
+      label: '02 ROUTER',
+      title: 'FastAPI Route',
+      description: 'Payload validation and router dispatch.',
+      badge: 'POST /events/register',
+      filePath: 'app/api/events.py',
+      icon: 'router',
+    },
+    {
+      step: '03',
+      label: '03 SERVICE',
+      title: 'Event Service',
+      description: 'Validates capacity and user eligibility checks.',
+      filePath: 'app/services/event_service.py',
+      icon: 'memory',
+    },
+    {
+      step: '04',
+      label: '04 STORAGE',
+      title: 'PostgreSQL',
+      description: 'Persists transaction into event_attendees table.',
+      filePath: 'app/models/event.py',
+      icon: 'database',
+    },
+  ],
+  relevantFiles: [
+    { path: 'src/api/events.ts', lines: 'L24-L62' },
+    { path: 'app/api/events.py', lines: 'L88-L115' },
+    { path: 'app/services/event_service.py', lines: 'L142-L190' },
+    { path: 'app/models/event.py', lines: 'L45-L78' },
+  ],
+  taskPrompt:
+    'Explain how an event registration request travels through the application, starting from the frontend and ending when the registration is persisted in the database.',
+  hint: 'Identify the frontend API call, backend route, service responsible for business logic, and database model involved.',
+  initialExplanation: `1. The client invokes registerForEvent(eventId) in src/api/events.ts via an HTTP POST request with authentication bearer token.
+2. The request hits FastAPI at POST /api/v1/events/register defined in app/api/events.py, where payload validation is performed via EventRegisterSchema.
+3. The route handler delegates business logic to EventService.register_attendee() in app/services/event_service.py to enforce capacity constraints.
+4. Finally, EventService creates an EventAttendee record via SQLAlchemy and commits the session in app/models/event.py.`,
+  maxCharacters: 1000,
+  successFeedback: {
+    score: '100% Score',
+    title: 'Understanding verified',
+    subtitle:
+      'Your explanation correctly identified the major components involved in the request flow.',
+    checklist: [
+      { label: 'Frontend request', verified: true },
+      { label: 'API route', verified: true },
+      { label: 'Service layer', verified: true },
+      { label: 'Database model', verified: true },
+    ],
+    whatYouUnderstood:
+      'You cleanly traced how API contracts decouple client state from backend business logic in event_service.py and identified the atomic persistence cycle in the PostgreSQL model layer.',
+  },
+  reviewFeedback: {
+    status: 'Partial',
+    title: 'Almost there — needs clarification',
+    subtitle:
+      'Your trace captures the frontend and HTTP router, but omits the core service layer transaction.',
+    checklist: [
+      { label: 'Frontend request', verified: true },
+      { label: 'API route', verified: true },
+      { label: 'Missing: Service logic', verified: false },
+      { label: 'Missing: DB model commit', verified: false },
+    ],
+    diagnostic:
+      'Make sure to mention app/services/event_service.py where capacity validation occurs prior to writing to app/models/event.py.',
+  },
 };

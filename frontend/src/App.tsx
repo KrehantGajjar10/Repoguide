@@ -8,6 +8,7 @@ import { RepositoryAnalysisPage } from './pages/RepositoryAnalysisPage';
 import { ProjectOverviewPage } from './pages/ProjectOverviewPage';
 import { ArchitectureExplorerPage } from './pages/ArchitectureExplorerPage';
 import { OnboardingPage } from './pages/OnboardingPage';
+import { TaskVerificationPage } from './pages/TaskVerificationPage';
 import './App.css';
 
 const App: React.FC = () => {
@@ -22,6 +23,8 @@ const App: React.FC = () => {
             <Route path="/overview" element={<ProjectOverviewPage />} />
             <Route path="/architecture" element={<ArchitectureExplorerPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
+            <Route path="/onboarding/task/api-request-flow" element={<TaskVerificationPage />} />
+            <Route path="/onboarding/task/:taskId" element={<TaskVerificationPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
           <Footer />

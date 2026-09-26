@@ -113,3 +113,92 @@ export interface ArchitectureData {
   commitHash: string;
   nodes: ArchitectureNode[];
 }
+
+export interface OnboardingTask {
+  id: string;
+  slug: string;
+  number: string;
+  title: string;
+  description: string;
+  status: 'completed' | 'in_progress' | 'locked';
+  estimatedMinutes: number;
+  verifiedNote?: string;
+  tag?: string;
+  difficulty?: string;
+  category?: string;
+  checkpointNote?: string;
+}
+
+export interface OnboardingJourneyData {
+  repository: Repository;
+  totalTasks: number;
+  completedTasks: number;
+  inProgressTasks: number;
+  upcomingTasks: number;
+  progressPercent: number;
+  estimatedTotalMinutes: number;
+  nextCheckpoint: string;
+  currentTask: OnboardingTask;
+  tasks: OnboardingTask[];
+  keyFiles: { path: string; role: string }[];
+  requestLifecycle: string[];
+  competencies: {
+    id: string;
+    title: string;
+    description: string;
+    icon: 'architecture' | 'api' | 'data' | 'workflow';
+  }[];
+  checkpointPreview: string;
+}
+
+export interface PipelineStep {
+  step: string;
+  label: string;
+  title: string;
+  description: string;
+  badge?: string;
+  filePath: string;
+  icon: 'devices' | 'router' | 'memory' | 'database';
+}
+
+export interface RelevantFileItem {
+  path: string;
+  lines: string;
+}
+
+export interface TaskVerificationData {
+  taskId: string;
+  taskNumber: string;
+  title: string;
+  description: string;
+  difficulty: string;
+  estimatedTime: string;
+  category: string;
+  overallProgress: {
+    completed: number;
+    total: number;
+    percent: number;
+  };
+  branch: string;
+  commitHash: string;
+  pipelineSteps: PipelineStep[];
+  relevantFiles: RelevantFileItem[];
+  taskPrompt: string;
+  hint: string;
+  initialExplanation: string;
+  maxCharacters: number;
+  successFeedback: {
+    score: string;
+    title: string;
+    subtitle: string;
+    checklist: { label: string; verified: boolean }[];
+    whatYouUnderstood: string;
+  };
+  reviewFeedback: {
+    status: string;
+    title: string;
+    subtitle: string;
+    checklist: { label: string; verified: boolean }[];
+    diagnostic: string;
+  };
+}
