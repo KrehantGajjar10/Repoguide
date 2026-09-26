@@ -5,6 +5,7 @@ import type {
   ArchitectureData,
   OnboardingJourneyData,
   TaskVerificationData,
+  CompletionReportData,
 } from '../types';
 
 export const RECENT_REPOSITORIES: Repository[] = [
@@ -721,3 +722,117 @@ export const DEMO_TASK_VERIFICATION: TaskVerificationData = {
       'Make sure to mention app/services/event_service.py where capacity validation occurs prior to writing to app/models/event.py.',
   },
 };
+
+export const DEMO_COMPLETION_REPORT: CompletionReportData = {
+  repository: RECENT_REPOSITORIES[0],
+  totalTasks: 6,
+  verifiedTasks: 6,
+  totalDuration: '51 mins',
+  summaryMetrics: {
+    modules: 8,
+    routes: 18,
+    models: 9,
+    dependencies: 24,
+  },
+  pipeline: [
+    'Frontend',
+    'API Layer',
+    'Domain Services',
+    'PostgreSQL Database',
+  ],
+  domains: [
+    {
+      id: '01',
+      number: '01',
+      title: 'Project Structure',
+      description: 'Repository organization, monorepo hierarchy, and key directory conventions.',
+      tags: '/apps · /packages',
+      status: 'Passed',
+    },
+    {
+      id: '02',
+      number: '02',
+      title: 'Application Architecture',
+      description: 'Interactions across frontend, API gateway, domain services, and database.',
+      tags: 'Graph topology',
+      status: 'Passed',
+    },
+    {
+      id: '03',
+      number: '03',
+      title: 'Authentication',
+      description: 'JWT lifecycle, session cookies, route guards, and identity authorization.',
+      tags: '/core/auth/jwt',
+      status: 'Passed',
+    },
+    {
+      id: '04',
+      number: '04',
+      title: 'API Request Flow',
+      description: 'End-to-end request tracing from React client through FastAPI routes to persistence.',
+      tags: '/api/v1/routes',
+      status: 'Passed',
+    },
+    {
+      id: '05',
+      number: '05',
+      title: 'Database & Data Model',
+      description: 'PostgreSQL schemas, SQLAlchemy ORM mappings, and transaction boundaries.',
+      tags: 'models/*.py · alembic',
+      status: 'Passed',
+    },
+    {
+      id: '06',
+      number: '06',
+      title: 'Development Workflow',
+      description: 'Local setup, test execution (pytest & vitest), and PR contribution guidelines.',
+      tags: 'vitest · pytest · Docker',
+      status: 'Passed',
+    },
+  ],
+  history: [
+    {
+      number: '01',
+      title: 'Project Structure',
+      description: 'Verified directory tree and root configurations',
+      duration: '5 min',
+      verified: true,
+    },
+    {
+      number: '02',
+      title: 'Application Architecture',
+      description: 'Validated boundary layers and service interaction patterns',
+      duration: '8 min',
+      verified: true,
+    },
+    {
+      number: '03',
+      title: 'Authentication',
+      description: 'Verified authorization tokens, roles, and HTTP-only cookie handlers',
+      duration: '10 min',
+      verified: true,
+    },
+    {
+      number: '04',
+      title: 'API Request Flow',
+      description: 'Traced request cycle from React hook to FastAPI route and handler',
+      duration: '10 min',
+      verified: true,
+    },
+    {
+      number: '05',
+      title: 'Database & Data Model',
+      description: 'Confirmed relational schemas, foreign key indices, and migrations',
+      duration: '8 min',
+      verified: true,
+    },
+    {
+      number: '06',
+      title: 'Final Repository Verification',
+      description: 'Executed local test suites and validated branch readiness',
+      duration: '10 min',
+      verified: true,
+    },
+  ],
+};
+

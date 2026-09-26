@@ -70,13 +70,20 @@ export const OnboardingPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 self-start md:self-auto">
+        <div className="flex items-center gap-2.5 self-start md:self-auto flex-wrap">
           <Link
             to="/architecture"
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-border bg-card text-foreground hover:bg-secondary hover:border-muted-foreground/30 text-xs sm:text-sm font-medium transition-colors duration-150 shadow-xs"
           >
             <Network className="w-4 h-4 text-muted-foreground" />
             <span>Explore Architecture</span>
+          </Link>
+          <Link
+            to="/onboarding/completion"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-secondary text-foreground hover:bg-secondary/80 text-xs sm:text-sm font-medium transition-colors duration-150 shadow-xs"
+          >
+            <CheckCircle2 className="w-4 h-4 text-primary" />
+            <span>Completion Report</span>
           </Link>
         </div>
       </div>

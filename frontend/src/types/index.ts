@@ -202,3 +202,37 @@ export interface TaskVerificationData {
     diagnostic: string;
   };
 }
+
+export interface VerifiedDomain {
+  id: string;
+  number: string;
+  title: string;
+  description: string;
+  tags: string;
+  status: string;
+}
+
+export interface VerificationHistoryItem {
+  number: string;
+  title: string;
+  description: string;
+  duration: string;
+  verified: boolean;
+}
+
+export interface CompletionReportData {
+  repository: Repository;
+  totalTasks: number;
+  verifiedTasks: number;
+  totalDuration: string;
+  summaryMetrics: {
+    modules: number;
+    routes: number;
+    models: number;
+    dependencies: number;
+  };
+  pipeline: string[];
+  domains: VerifiedDomain[];
+  history: VerificationHistoryItem[];
+}
+

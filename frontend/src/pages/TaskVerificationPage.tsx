@@ -460,7 +460,7 @@ export const TaskVerificationPage: React.FC = () => {
                       </Link>
                       <button
                         type="button"
-                        onClick={() => navigate('/onboarding')}
+                        onClick={() => navigate('/onboarding/completion')}
                         className="px-4 py-1.5 rounded-md bg-primary text-primary-foreground text-xs sm:text-sm font-semibold hover:opacity-90 transition-opacity inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
                       >
                         <span>Continue to Next Task</span>

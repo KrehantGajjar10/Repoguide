@@ -5,6 +5,7 @@ import type {
   ArchitectureData,
   OnboardingJourneyData,
   TaskVerificationData,
+  CompletionReportData,
 } from '../types';
 import {
   RECENT_REPOSITORIES,
@@ -13,11 +14,16 @@ import {
   DEMO_ARCHITECTURE_DATA,
   DEMO_ONBOARDING_JOURNEY,
   DEMO_TASK_VERIFICATION,
+  DEMO_COMPLETION_REPORT,
 } from '../data/mockData';
 
 export const repositoryService = {
   getRecentRepositories: async (): Promise<Repository[]> => {
     return Promise.resolve([...RECENT_REPOSITORIES]);
+  },
+
+  getCompletionReport: async (): Promise<CompletionReportData> => {
+    return Promise.resolve({ ...DEMO_COMPLETION_REPORT });
   },
 
   getAnalysisData: async (): Promise<AnalysisData> => {
