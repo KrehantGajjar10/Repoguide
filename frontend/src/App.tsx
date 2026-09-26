@@ -6,6 +6,8 @@ import { Footer } from './components/Footer';
 import { ConnectRepositoryPage } from './pages/ConnectRepositoryPage';
 import { RepositoryAnalysisPage } from './pages/RepositoryAnalysisPage';
 import { ProjectOverviewPage } from './pages/ProjectOverviewPage';
+import { ArchitectureExplorerPage } from './pages/ArchitectureExplorerPage';
+import { OnboardingPage } from './pages/OnboardingPage';
 import './App.css';
 
 const App: React.FC = () => {
@@ -18,6 +20,8 @@ const App: React.FC = () => {
             <Route path="/" element={<ConnectRepositoryPage />} />
             <Route path="/analysis" element={<RepositoryAnalysisPage />} />
             <Route path="/overview" element={<ProjectOverviewPage />} />
+            <Route path="/architecture" element={<ArchitectureExplorerPage />} />
+            <Route path="/onboarding" element={<OnboardingPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
           <Footer />

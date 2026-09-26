@@ -1,4 +1,9 @@
-import type { Repository, AnalysisData } from '../types';
+import type {
+  Repository,
+  AnalysisData,
+  ProjectOverviewData,
+  ArchitectureData,
+} from '../types';
 
 export const RECENT_REPOSITORIES: Repository[] = [
   {
@@ -144,4 +149,341 @@ export const DEMO_ANALYSIS_DATA: AnalysisData = {
   ],
   daemonChannel: '#analysis-daemon-01',
   daemonLatency: '14ms',
+};
+
+export const DEMO_PROJECT_OVERVIEW_DATA: ProjectOverviewData = {
+  repository: RECENT_REPOSITORIES[0],
+  commitHash: 'rev 3f29b1d',
+  description: 'A campus event discovery and management platform for students and organizers.',
+  metrics: [
+    {
+      id: 'modules',
+      label: 'Modules',
+      value: 8,
+      detail: 'Core packages',
+      icon: 'modules',
+    },
+    {
+      id: 'routes',
+      label: 'API Routes',
+      value: 18,
+      detail: 'REST endpoints',
+      icon: 'routes',
+    },
+    {
+      id: 'models',
+      label: 'Database Models',
+      value: 9,
+      detail: 'Schemas mapped',
+      icon: 'models',
+    },
+    {
+      id: 'dependencies',
+      label: 'Dependencies',
+      value: 24,
+      detail: 'Direct deps',
+      icon: 'dependencies',
+    },
+  ],
+  architectureLayers: [
+    {
+      step: '01 / CLIENT',
+      name: 'Frontend',
+      tech: 'React · TypeScript · Tailwind',
+      runtime: 'Vite SPA',
+      port: 'Port 5173',
+      icon: 'devices',
+    },
+    {
+      step: '02 / GATEWAY',
+      name: 'API Layer',
+      tech: 'FastAPI · REST Endpoints',
+      runtime: 'Uvicorn ASGI',
+      port: 'Port 8000',
+      icon: 'route',
+    },
+    {
+      step: '03 / DOMAIN',
+      name: 'Service Layer',
+      tech: 'Business Logic & Workflows',
+      runtime: 'Domain Events',
+      port: 'Async workers',
+      icon: 'hub',
+    },
+    {
+      step: '04 / STORAGE',
+      name: 'Database',
+      tech: 'PostgreSQL · SQLAlchemy',
+      runtime: 'Alembic Migrations',
+      port: 'Port 5432',
+      icon: 'database',
+    },
+  ],
+  techStack: [
+    {
+      category: 'Frontend',
+      icon: 'frontend',
+      items: ['React 18', 'TypeScript 5', 'Tailwind CSS', 'Vite'],
+    },
+    {
+      category: 'Backend',
+      icon: 'backend',
+      items: ['FastAPI', 'Python 3.11', 'Pydantic v2', 'Uvicorn'],
+    },
+    {
+      category: 'Database',
+      icon: 'database',
+      items: ['PostgreSQL 15', 'SQLAlchemy', 'Alembic'],
+    },
+    {
+      category: 'Tooling & Infra',
+      icon: 'tooling',
+      items: ['Docker', 'Compose', 'Vitest', 'Pytest'],
+    },
+  ],
+  keyModules: [
+    {
+      id: 'auth',
+      name: 'Authentication',
+      path: 'src/auth/',
+      description: 'Handles user authentication, sessions, and authorization protocols.',
+    },
+    {
+      id: 'events',
+      name: 'Events',
+      path: 'src/events/',
+      description: 'Core event creation, discovery, RSVP tracking, and organizer logic.',
+    },
+    {
+      id: 'api',
+      name: 'API',
+      path: 'app/api/',
+      description: 'Backend API routes, schema validation, and request pipelines.',
+    },
+    {
+      id: 'models',
+      name: 'Database',
+      path: 'app/models/',
+      description: 'Database models, entity relationships, and persistence layer.',
+    },
+  ],
+  fileTree: {
+    name: 'campus-connect',
+    type: 'folder',
+    children: [
+      {
+        name: 'frontend',
+        type: 'folder',
+        children: [
+          {
+            name: 'src',
+            type: 'folder',
+            children: [
+              { name: 'components', type: 'folder' },
+              { name: 'pages', type: 'folder' },
+            ],
+          },
+          { name: 'package.json', type: 'file' },
+        ],
+      },
+      {
+        name: 'backend',
+        type: 'folder',
+        children: [
+          {
+            name: 'app',
+            type: 'folder',
+            children: [
+              { name: 'api', type: 'folder' },
+              { name: 'services', type: 'folder' },
+              { name: 'models', type: 'folder' },
+            ],
+          },
+          { name: 'main.py', type: 'file' },
+        ],
+      },
+      {
+        name: 'tests',
+        type: 'folder',
+        children: [
+          { name: 'test_api.py', type: 'file' },
+          { name: 'test_events.py', type: 'file' },
+        ],
+      },
+      { name: 'docker-compose.yml', type: 'file' },
+      { name: 'README.md', type: 'file' },
+    ],
+  },
+};
+
+export const DEMO_ARCHITECTURE_DATA: ArchitectureData = {
+  repository: RECENT_REPOSITORIES[0],
+  engineSync: 'Engine Synced · HEAD 3f29b1d',
+  commitHash: 'rev 3f29b1d',
+  nodes: [
+    {
+      id: 'api-layer',
+      name: 'API Layer',
+      type: 'gateway',
+      badge: 'Gateway / API',
+      sublabel: 'HTTP endpoints, CORS & schema validation via Pydantic',
+      tech: 'FastAPI',
+      port: 'Port 8000',
+      location: 'app/api/',
+      filesCount: 7,
+      dependenciesCount: '3 internal · 5 external',
+      endpointsCount: '18 REST endpoints',
+      purpose:
+        'Handles incoming HTTP requests, performs strict schema validation via Pydantic v2, injects session security context, and routes execution calls to domain services.',
+      importantFiles: [
+        { name: 'app/main.py', role: 'Entrypoint' },
+        { name: 'app/api/routes.py', role: 'Router' },
+        { name: 'app/api/dependencies.py', role: 'DI Sessions' },
+        { name: 'app/api/v1/events.py', role: 'Endpoints' },
+      ],
+      ingress: ['Frontend (Vite SPA Client)'],
+      egress: [
+        { name: 'Auth Service', note: 'Token verification' },
+        { name: 'Event Service', note: 'Business logic' },
+        { name: 'Database', note: 'SQLAlchemy session' },
+      ],
+      routes: [
+        { method: 'GET', path: '/api/v1/events', action: 'List' },
+        { method: 'POST', path: '/api/v1/events', action: 'Create' },
+        { method: 'GET', path: '/api/v1/events/{id}', action: 'Detail' },
+        { method: 'POST', path: '/api/v1/events/{id}/register', action: 'Queue' },
+      ],
+      coords: { x: 50, y: 35 },
+    },
+    {
+      id: 'frontend',
+      name: 'Frontend',
+      type: 'client',
+      badge: 'Application',
+      sublabel: 'Client application (Vite SPA · React 18 · TS)',
+      tech: 'React 18',
+      port: 'Port 5173',
+      location: 'frontend/src/',
+      filesCount: 16,
+      dependenciesCount: '12 external',
+      endpointsCount: 'Consumes 18 REST endpoints',
+      purpose:
+        'Single-page web client providing interactive onboarding, responsive dashboards, authentication forms, and real-time event exploration.',
+      importantFiles: [
+        { name: 'src/main.tsx', role: 'Bootstrap' },
+        { name: 'src/App.tsx', role: 'Routing' },
+        { name: 'src/pages/EventsPage.tsx', role: 'UI View' },
+        { name: 'src/services/api.ts', role: 'HTTP Client' },
+      ],
+      ingress: ['Browser / User Client'],
+      egress: [{ name: 'API Layer', note: 'HTTPS / REST Port 8000' }],
+      routes: [],
+      coords: { x: 50, y: 10 },
+    },
+    {
+      id: 'auth-service',
+      name: 'Auth Service',
+      type: 'service',
+      badge: 'Service',
+      sublabel: 'JWT claims, OAuth2 scopes & session tokens',
+      tech: 'Python / Pydantic',
+      port: 'Internal',
+      location: 'src/auth/',
+      filesCount: 4,
+      dependenciesCount: '2 internal · 3 external',
+      endpointsCount: '4 OAuth routes',
+      purpose:
+        'Validates cryptographic JWT tokens, manages password hashing with Argon2, enforces role-based permissions, and coordinates session lifecycles.',
+      importantFiles: [
+        { name: 'src/auth/jwt.py', role: 'Cryptographic claims' },
+        { name: 'src/auth/service.py', role: 'Business logic' },
+        { name: 'src/auth/schemas.py', role: 'Token schemas' },
+      ],
+      ingress: ['API Layer (Gateway)'],
+      egress: [{ name: 'Database', note: 'User & Session tables' }],
+      routes: [
+        { method: 'POST', path: '/api/v1/auth/login', action: 'Authenticate' },
+        { method: 'POST', path: '/api/v1/auth/refresh', action: 'Rotate' },
+      ],
+      coords: { x: 22, y: 62 },
+    },
+    {
+      id: 'event-service',
+      name: 'Event Service',
+      type: 'service',
+      badge: 'Service',
+      sublabel: 'Event registration queues & ticketing lifecycle',
+      tech: 'Python / Celery',
+      port: 'Internal',
+      location: 'src/events/',
+      filesCount: 6,
+      dependenciesCount: '3 internal · 4 external',
+      endpointsCount: '8 Event routes',
+      purpose:
+        'Orchestrates campus event publishing, ticket reservations, attendance tracking, and dispatches asynchronous notification tasks to queue workers.',
+      importantFiles: [
+        { name: 'src/events/models.py', role: 'Domain entities' },
+        { name: 'src/events/manager.py', role: 'RSVP workflow' },
+        { name: 'src/events/tasks.py', role: 'Async notifications' },
+      ],
+      ingress: ['API Layer (Gateway)'],
+      egress: [
+        { name: 'Database', note: 'Event records' },
+        { name: 'Queue Worker', note: 'Redis task broker' },
+      ],
+      routes: [
+        { method: 'GET', path: '/api/v1/events', action: 'Query' },
+        { method: 'POST', path: '/api/v1/events/rsvp', action: 'Book' },
+      ],
+      coords: { x: 74, y: 62 },
+    },
+    {
+      id: 'database',
+      name: 'Database',
+      type: 'storage',
+      badge: 'Data Store',
+      sublabel: 'PostgreSQL 15 · SQLAlchemy ORM & Alembic migrations',
+      tech: 'PostgreSQL 15',
+      port: 'Port 5432',
+      location: 'app/models/',
+      filesCount: 9,
+      dependenciesCount: 'SQLAlchemy · psycopg2',
+      endpointsCount: '9 Schemas',
+      purpose:
+        'Primary ACID-compliant relational persistence store for user accounts, campus events, attendee registrations, and audit logs with Alembic versioning.',
+      importantFiles: [
+        { name: 'app/models/base.py', role: 'Declarative Base' },
+        { name: 'app/models/user.py', role: 'User Schema' },
+        { name: 'app/models/event.py', role: 'Event Schema' },
+        { name: 'alembic/versions/', role: 'Migrations' },
+      ],
+      ingress: ['Auth Service', 'Event Service', 'API Layer'],
+      egress: [],
+      routes: [],
+      coords: { x: 50, y: 90 },
+    },
+    {
+      id: 'queue-worker',
+      name: 'Queue Worker',
+      type: 'worker',
+      badge: 'Async Task',
+      sublabel: 'Celery + Redis bus for background jobs',
+      tech: 'Celery / Redis',
+      port: 'Port 6379',
+      location: 'app/workers/',
+      filesCount: 3,
+      dependenciesCount: 'Celery · Redis',
+      endpointsCount: 'Background tasks',
+      purpose:
+        'Executes non-blocking background tasks including email notifications, attendee verification badges, and automated event reminder webhooks.',
+      importantFiles: [
+        { name: 'app/workers/celery_app.py', role: 'Celery instance' },
+        { name: 'app/workers/email_tasks.py', role: 'Notification dispatcher' },
+      ],
+      ingress: ['Event Service'],
+      egress: [{ name: 'Database', note: 'Status updates' }],
+      routes: [],
+      coords: { x: 94, y: 62 },
+    },
+  ],
 };

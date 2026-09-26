@@ -60,12 +60,22 @@ export const Navbar: React.FC = () => {
           >
             Overview
           </Link>
-          <a
-            href="#how-it-works"
-            className="text-muted-foreground font-normal hover:text-foreground hover:bg-secondary transition-colors duration-150 px-3 py-1.5 rounded-md"
+          <Link
+            to="/architecture"
+            className={`font-normal hover:text-foreground hover:bg-secondary transition-colors duration-150 px-3 py-1.5 rounded-md ${
+              location.pathname === '/architecture' ? 'text-foreground bg-secondary font-medium' : 'text-muted-foreground'
+            }`}
           >
-            How it works
-          </a>
+            Architecture
+          </Link>
+          <Link
+            to="/onboarding"
+            className={`font-normal hover:text-foreground hover:bg-secondary transition-colors duration-150 px-3 py-1.5 rounded-md ${
+              location.pathname === '/onboarding' ? 'text-foreground bg-secondary font-medium' : 'text-muted-foreground'
+            }`}
+          >
+            Onboarding
+          </Link>
           <a
             href="#docs"
             className="text-muted-foreground font-normal hover:text-foreground hover:bg-secondary transition-colors duration-150 px-3 py-1.5 rounded-md"
@@ -133,6 +143,20 @@ export const Navbar: React.FC = () => {
             className="block px-3 py-2 rounded-md text-sm text-foreground hover:bg-secondary font-mono"
           >
             Overview
+          </Link>
+          <Link
+            to="/architecture"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2 rounded-md text-sm text-foreground hover:bg-secondary font-mono"
+          >
+            Architecture
+          </Link>
+          <Link
+            to="/onboarding"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2 rounded-md text-sm text-foreground hover:bg-secondary font-mono"
+          >
+            Onboarding
           </Link>
           <a
             href="#how-it-works"
