@@ -21,16 +21,25 @@ export const ConnectRepositoryPage: React.FC = () => {
   const [repoUrl, setRepoUrl] = useState('https://github.com/example/campus-connect');
   const [copied, setCopied] = useState(false);
   const [recentRepos, setRecentRepos] = useState<Repository[]>([]);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [connectError, setConnectError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     repositoryService.getRecentRepositories().then(setRecentRepos);
   }, []);
 
-  const handleAnalyze = (e: React.FormEvent) => {
+  const handleAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (repoUrl.trim()) {
+    if (!repoUrl.trim()) return;
+    setAnalyzing(true);
+    setConnectError(null);
+    try {
+      await repositoryService.connectRepositoryUrl(repoUrl.trim());
       navigate('/analysis');
+    } catch (err) {
+      setConnectError(err instanceof Error ? err.message : 'Failed to connect repository.');
+      setAnalyzing(false);
     }
   };
 
@@ -156,7 +165,7 @@ export const ConnectRepositoryPage: React.FC = () => {
                 type="url"
                 required
                 value={repoUrl}
-                onChange={(e) => setRepoUrl(e.target.value)}
+                onChange={(e) => { setRepoUrl(e.target.value); setConnectError(null); }}
                 placeholder="https://github.com/organization/project"
                 className="w-full h-10 px-3.5 bg-background text-foreground border border-border rounded-md text-[13px] font-mono placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors"
               />
@@ -167,12 +176,16 @@ export const ConnectRepositoryPage: React.FC = () => {
             </div>
             <button
               type="submit"
-              className="h-10 px-5 rounded-md bg-primary text-primary-foreground font-medium text-[13px] inline-flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              disabled={analyzing}
+              className="h-10 px-5 rounded-md bg-primary text-primary-foreground font-medium text-[13px] inline-flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <span>Analyze Repository</span>
+              <span>{analyzing ? 'Connecting…' : 'Analyze Repository'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
+          {connectError && (
+            <p className="text-xs text-destructive mt-1">{connectError}</p>
+          )}
         </form>
 
         {/* Local inspection footer */}

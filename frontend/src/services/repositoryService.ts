@@ -17,6 +17,54 @@ import {
   DEMO_COMPLETION_REPORT,
 } from '../data/mockData';
 
+// ---------------------------------------------------------------------------
+// Backend API client
+// ---------------------------------------------------------------------------
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';
+
+export interface BackendRepository {
+  id: string;
+  url: string;
+  name: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface BackendErrorDetail {
+  status: string;
+  message: string;
+}
+
+interface BackendValidationError {
+  detail: { msg: string }[] | BackendErrorDetail;
+}
+
+async function apiPost<T>(path: string, body: unknown): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    let message = `Request failed (${response.status})`;
+    try {
+      const err = (await response.json()) as BackendValidationError;
+      if (Array.isArray(err.detail)) {
+        message = err.detail.map((d) => d.msg).join('; ');
+      } else if (err.detail && typeof err.detail === 'object' && 'message' in err.detail) {
+        message = (err.detail as BackendErrorDetail).message;
+      }
+    } catch {
+      // ignore parse errors
+    }
+    throw new Error(message);
+  }
+
+  return response.json() as Promise<T>;
+}
+
 export const repositoryService = {
   getRecentRepositories: async (): Promise<Repository[]> => {
     return Promise.resolve([...RECENT_REPOSITORIES]);
@@ -125,10 +173,8 @@ export const repositoryService = {
   },
 
   connectRepositoryUrl: async (url: string): Promise<{ success: boolean; repoId: string }> => {
-    return Promise.resolve({
-      success: true,
-      repoId: url.includes('campus') ? 'campusconnect' : 'campusconnect',
-    });
+    const repo = await apiPost<BackendRepository>('/api/v1/repositories', { url });
+    return { success: true, repoId: repo.id };
   },
 };
 

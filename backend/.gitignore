@@ -1,0 +1,30 @@
+# ---------------------------------------------------------------
+# RENAME THIS FILE TO  .gitignore  after cloning / checkout
+# ---------------------------------------------------------------
+
+# Secrets — never commit real environment files
+.env
+.env.*
+!.env.example
+
+# Python virtual environment (uv)
+.venv/
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Test / tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Temporary repository storage (Chapter 2+)
+repository_temp/
+tmp/
+logs/
+
+# Local databases (SQLite fallback)
+*.db
+*.sqlite
