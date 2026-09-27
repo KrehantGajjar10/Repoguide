@@ -40,12 +40,11 @@ interface BackendValidationError {
   detail: { msg: string }[] | BackendErrorDetail;
 }
 
-async function apiPost<T>(path: string, body: unknown): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
+async function apiFetch<T>(method: 'GET' | 'POST', path: string, body?: unknown): Promise<T> {
+  const init: RequestInit = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body !== undefined) init.body = JSON.stringify(body);
+
+  const response = await fetch(`${API_BASE_URL}${path}`, init);
 
   if (!response.ok) {
     let message = `Request failed (${response.status})`;
@@ -63,6 +62,35 @@ async function apiPost<T>(path: string, body: unknown): Promise<T> {
   }
 
   return response.json() as Promise<T>;
+}
+
+function apiPost<T>(path: string, body: unknown): Promise<T> {
+  return apiFetch<T>('POST', path, body);
+}
+
+function apiGet<T>(path: string): Promise<T> {
+  return apiFetch<T>('GET', path);
+}
+
+// ---------------------------------------------------------------------------
+// Backend analysis types
+// ---------------------------------------------------------------------------
+export interface BackendAnalysisStatus {
+  repository_id: string;
+  status: string;
+  progress: number;
+  message: string;
+  file_count: number | null;
+  directory_count: number | null;
+  technologies: string[] | null;
+  top_level_dirs: string[] | null;
+  extension_counts: Record<string, number> | null;
+  default_branch: string | null;
+  repository_name: string | null;
+  repository_url: string | null;
+  analysis_started_at: string | null;
+  analysis_completed_at: string | null;
+  error_message: string | null;
 }
 
 export const repositoryService = {
@@ -175,6 +203,18 @@ export const repositoryService = {
   connectRepositoryUrl: async (url: string): Promise<{ success: boolean; repoId: string }> => {
     const repo = await apiPost<BackendRepository>('/api/v1/repositories', { url });
     return { success: true, repoId: repo.id };
+  },
+
+  startAnalysis: async (repoId: string): Promise<{ status: string; message: string }> => {
+    const result = await apiPost<{ repository_id: string; status: string; message: string }>(
+      `/api/v1/repositories/${repoId}/analyze`,
+      {}
+    );
+    return { status: result.status, message: result.message };
+  },
+
+  getAnalysisStatus: async (repoId: string): Promise<BackendAnalysisStatus> => {
+    return apiGet<BackendAnalysisStatus>(`/api/v1/repositories/${repoId}/analysis`);
   },
 };
 

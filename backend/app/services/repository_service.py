@@ -22,7 +22,7 @@ async def create_repository(
         status="created",
     )
     db.add(repo)
-    await db.flush()  # populate DB-generated fields without closing transaction
+    await db.flush()
     await db.refresh(repo)
     return repo
 

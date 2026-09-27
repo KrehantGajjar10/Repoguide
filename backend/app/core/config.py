@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     port: int = 8000
     cors_origins: str = "http://localhost:5173"
 
+    # Analysis pipeline settings (can be overridden via .env)
+    clone_timeout_seconds: int = 120
+    max_repo_size_mb: int = 200
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]

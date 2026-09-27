@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { repoSession } from '../services/repoSession';
 import {
   ArrowRight,
   Terminal,
@@ -35,7 +36,13 @@ export const ConnectRepositoryPage: React.FC = () => {
     setAnalyzing(true);
     setConnectError(null);
     try {
-      await repositoryService.connectRepositoryUrl(repoUrl.trim());
+      const { repoId } = await repositoryService.connectRepositoryUrl(repoUrl.trim());
+      // Persist the real UUID so the Analysis page can poll it
+      repoSession.set(repoId);
+      // Fire analysis in the background (don't await — navigate immediately)
+      repositoryService.startAnalysis(repoId).catch(() => {
+        // If start fails the Analysis page will surface the error via polling
+      });
       navigate('/analysis');
     } catch (err) {
       setConnectError(err instanceof Error ? err.message : 'Failed to connect repository.');
