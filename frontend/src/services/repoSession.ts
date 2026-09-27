@@ -1,23 +1,38 @@
 /**
- * Minimal in-memory store for the current repository ID.
+ * Persistent repository session using sessionStorage.
  *
- * Used to carry the real backend UUID from the Connect Repository page
- * to the Repository Analysis page without introducing a full state manager.
+ * Survives page refresh within the same browser tab.
+ * Cleared when the tab is closed, or explicitly via repoSession.clear().
  *
- * The value is set when the user submits a URL and cleared once the analysis
- * page is done with it.
+ * Falls back silently to an in-memory value when sessionStorage is unavailable
+ * (e.g. in certain test environments).
  */
 
-let _currentRepoId: string | null = null;
+const SESSION_KEY = 'repoguide_repo_id';
+
+let _memFallback: string | null = null;
+
+function _canUseSessionStorage(): boolean {
+  try {
+    sessionStorage.setItem('__rg_test__', '1');
+    sessionStorage.removeItem('__rg_test__');
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export const repoSession = {
   set(id: string): void {
-    _currentRepoId = id;
+    _memFallback = id;
+    if (_canUseSessionStorage()) sessionStorage.setItem(SESSION_KEY, id);
   },
   get(): string | null {
-    return _currentRepoId;
+    if (_canUseSessionStorage()) return sessionStorage.getItem(SESSION_KEY);
+    return _memFallback;
   },
   clear(): void {
-    _currentRepoId = null;
+    _memFallback = null;
+    if (_canUseSessionStorage()) sessionStorage.removeItem(SESSION_KEY);
   },
 };

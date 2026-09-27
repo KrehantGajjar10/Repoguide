@@ -100,10 +100,15 @@ function buildStages(backendStatus: string, analysis: BackendAnalysisStatus): UI
   if (s === 'failed') {
     return [
       completed('Queuing analysis', 'Started'),
-      { id: 'failed', title: 'Analysis failed', detail: analysis.error_message ?? 'An error occurred.', status: 'analyzing' },
+      { id: 'failed', title: 'Analysis failed', detail: analysis.error_message ?? 'An error occurred.', status: 'analyzing' as const },
     ];
   }
-  return DEMO_ANALYSIS_DATA.stages as UIStage[];
+  // Unknown/transient status — show a generic loading stage, never mock data
+  return [
+    active('Starting analysis', 'Connecting to backend…'),
+    pending('Repository structure', 'Waiting'),
+    pending('Technology & dependencies', 'Waiting'),
+  ];
 }
 
 function buildLogs(backendStatus: string, analysis: BackendAnalysisStatus) {
@@ -132,7 +137,10 @@ function buildLogs(backendStatus: string, analysis: BackendAnalysisStatus) {
     logs.push({ id: 'lf', title: 'Analysis failed', detail: analysis.error_message ?? 'Unknown error', timestamp: ts(), status: 'active' as const });
   }
 
-  if (logs.length === 0) return DEMO_ANALYSIS_DATA.logs;
+  if (logs.length === 0) {
+    // No known status yet — show a single loading entry, never mock data
+    return [{ id: 'l0', title: 'Connecting to backend…', detail: '', timestamp: ts(), status: 'active' as const }];
+  }
   return logs;
 }
 
@@ -146,8 +154,15 @@ function buildMetrics(analysis: BackendAnalysisStatus, hasRealSession: boolean) 
       { id: 'm4', label: 'Branch', value: '—', detail: 'Analysis failed', icon: 'models' as const },
     ];
   }
-  // For in-progress real sessions, return demo metrics as placeholder.
-  if (analysis.status !== 'completed') return DEMO_ANALYSIS_DATA.metrics;
+  // For in-progress real sessions, return loading placeholders — never mock data.
+  if (analysis.status !== 'completed') {
+    return [
+      { id: 'm1', label: 'Files',         value: '—', detail: 'Analyzing…', icon: 'files' as const },
+      { id: 'm2', label: 'Technologies',  value: '—', detail: 'Analyzing…', icon: 'modules' as const },
+      { id: 'm3', label: 'Top extension', value: '—', detail: 'Analyzing…', icon: 'routes' as const },
+      { id: 'm4', label: 'Branch',        value: '—', detail: 'Analyzing…', icon: 'models' as const },
+    ];
+  }
   const techs = analysis.technologies ?? [];
   const exts = analysis.extension_counts ?? {};
   const topExt = Object.entries(exts).sort((a, b) => b[1] - a[1])[0];

@@ -23,39 +23,116 @@ import {
   FileCode,
 } from 'lucide-react';
 import { repositoryService } from '../services/repositoryService';
+import { repoSession } from '../services/repoSession';
 import type { ArchitectureData, ArchitectureNode } from '../types';
+import type { BackendArchitecture, BackendArchitectureNode } from '../services/repositoryService';
+
+// ---------------------------------------------------------------------------
+// Helpers: map a backend node list to the ArchitectureNode[] the UI uses
+// ---------------------------------------------------------------------------
+
+function mapNodes(raw: BackendArchitectureNode[]): ArchitectureNode[] {
+  return raw.map((n) => ({
+    id: n.id,
+    name: n.name,
+    type: n.type as ArchitectureNode['type'],
+    badge: n.badge,
+    sublabel: n.sublabel,
+    tech: n.tech,
+    port: n.port,
+    location: n.location,
+    filesCount: n.filesCount,
+    dependenciesCount: n.dependenciesCount,
+    endpointsCount: n.endpointsCount,
+    purpose: n.purpose,
+    importantFiles: n.importantFiles,
+    ingress: n.ingress,
+    egress: n.egress,
+    routes: n.routes as ArchitectureNode['routes'],
+    coords: n.coords,
+  }));
+}
+
+function makeArchData(b: BackendArchitecture, nodeList: BackendArchitectureNode[]): ArchitectureData {
+  return {
+    repository: {
+      id: b.repository_id,
+      name: b.repository_name,
+      branch: b.default_branch ?? 'main',
+      url: b.repository_url,
+      stack: [],
+      lastAnalyzed: 'Just analyzed',
+    },
+    engineSync: b.engine_sync,
+    commitHash: b.commit_hash,
+    nodes: mapNodes(nodeList),
+  };
+}
 
 export const ArchitectureExplorerPage: React.FC = () => {
   const navigate = useNavigate();
+  // Three separate node datasets stored in state
+  const [backendArch, setBackendArch] = useState<BackendArchitecture | null>(null);
   const [data, setData] = useState<ArchitectureData | null>(null);
-  const [selectedNodeId, setSelectedNodeId] = useState<string>('api-layer');
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [zoomLevel, setZoomLevel] = useState<number>(100);
   const [activeView, setActiveView] = useState<'logical' | 'dataflow' | 'deptree'>('logical');
   const [isInspectorOpen, setIsInspectorOpen] = useState<boolean>(true);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
+  const repoId = repoSession.get();
+
   useEffect(() => {
-    repositoryService.getArchitectureData().then((archData) => {
-      setData(archData);
-    });
-  }, []);
+    if (repoId) {
+      repositoryService.getRepositoryArchitecture(repoId)
+        .then((b) => {
+          setBackendArch(b);
+          const initial = makeArchData(b, b.nodes);
+          setData(initial);
+          if (initial.nodes.length > 0) setSelectedNodeId(initial.nodes[0].id);
+        })
+        .catch((err) => {
+          setLoadError(err instanceof Error ? err.message : 'Failed to load architecture.');
+        });
+    } else {
+      repositoryService.getArchitectureData().then((archData) => {
+        setData(archData);
+        if (archData.nodes.length > 0) setSelectedNodeId(archData.nodes[0].id);
+      });
+    }
+  }, [repoId]);
+
+  // Rebuild data when activeView changes (real session only)
+  useEffect(() => {
+    if (!backendArch) return;
+    const nodeList =
+      activeView === 'dataflow' ? backendArch.dataflow_nodes :
+      activeView === 'deptree'  ? backendArch.deptree_nodes  :
+                                  backendArch.nodes;
+    const rebuilt = makeArchData(backendArch, nodeList);
+    setData(rebuilt);
+    if (rebuilt.nodes.length > 0) setSelectedNodeId(rebuilt.nodes[0].id);
+  }, [activeView, backendArch]);
+
+  // Active nodes for current view
+  const activeNodes = useMemo<ArchitectureNode[]>(() => data?.nodes ?? [], [data]);
 
   const selectedNode = useMemo<ArchitectureNode | undefined>(() => {
-    if (!data) return undefined;
-    return data.nodes.find((n) => n.id === selectedNodeId) || data.nodes[0];
-  }, [data, selectedNodeId]);
+    return activeNodes.find((n) => n.id === selectedNodeId) || activeNodes[0];
+  }, [activeNodes, selectedNodeId]);
 
   const filteredNodes = useMemo(() => {
-    if (!data || !searchQuery.trim()) return [];
-    return data.nodes.filter(
+    if (!searchQuery.trim()) return [];
+    return activeNodes.filter(
       (n) =>
         n.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         n.tech.toLowerCase().includes(searchQuery.toLowerCase()) ||
         n.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
         n.purpose.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [data, searchQuery]);
+  }, [activeNodes, searchQuery]);
 
   const handleZoom = (delta: number) => {
     setZoomLevel((prev) => Math.min(150, Math.max(70, prev + delta)));
@@ -64,6 +141,17 @@ export const ArchitectureExplorerPage: React.FC = () => {
   const handleResetZoom = () => {
     setZoomLevel(100);
   };
+
+  if (loadError) {
+    return (
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-sm text-muted-foreground font-mono text-center">
+          <span className="text-destructive">{loadError}</span>
+          <span className="text-xs">Analysis may not be complete. Return to the analysis page and wait for completion.</span>
+        </div>
+      </main>
+    );
+  }
 
   if (!data || !selectedNode) {
     return (

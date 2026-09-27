@@ -93,6 +93,57 @@ export interface BackendAnalysisStatus {
   error_message: string | null;
 }
 
+export interface BackendOverview {
+  repository_id: string;
+  repository_name: string;
+  repository_url: string;
+  default_branch: string | null;
+  status: string;
+  project_type: string;
+  description: string;
+  file_count: number;
+  directory_count: number;
+  technologies: string[];
+  commit_hash: string;
+  top_level_dirs: string[];
+  metrics: { id: string; label: string; value: number | string; detail: string; icon: string }[];
+  architecture_layers: { step: string; name: string; tech: string; runtime: string; port: string; icon: string }[];
+  tech_stack: { category: string; icon: string; items: string[] }[];
+  key_modules: { id: string; name: string; path: string; description: string }[];
+}
+
+export interface BackendArchitectureNode {
+  id: string;
+  name: string;
+  type: string;
+  badge: string;
+  sublabel: string;
+  tech: string;
+  port: string;
+  location: string;
+  filesCount: number;
+  dependenciesCount: string;
+  endpointsCount: string;
+  purpose: string;
+  importantFiles: { name: string; role: string }[];
+  ingress: string[];
+  egress: { name: string; note: string }[];
+  routes: { method: string; path: string; action: string }[];
+  coords: { x: number; y: number };
+}
+
+export interface BackendArchitecture {
+  repository_id: string;
+  repository_name: string;
+  repository_url: string;
+  default_branch: string | null;
+  engine_sync: string;
+  commit_hash: string;
+  nodes: BackendArchitectureNode[];           // logical view
+  dataflow_nodes: BackendArchitectureNode[];  // data flow view
+  deptree_nodes: BackendArchitectureNode[];   // dependency tree view
+}
+
 export const repositoryService = {
   getRecentRepositories: async (): Promise<Repository[]> => {
     return Promise.resolve([...RECENT_REPOSITORIES]);
@@ -215,6 +266,14 @@ export const repositoryService = {
 
   getAnalysisStatus: async (repoId: string): Promise<BackendAnalysisStatus> => {
     return apiGet<BackendAnalysisStatus>(`/api/v1/repositories/${repoId}/analysis`);
+  },
+
+  getRepositoryOverview: async (repoId: string): Promise<BackendOverview> => {
+    return apiGet<BackendOverview>(`/api/v1/repositories/${repoId}/overview`);
+  },
+
+  getRepositoryArchitecture: async (repoId: string): Promise<BackendArchitecture> => {
+    return apiGet<BackendArchitecture>(`/api/v1/repositories/${repoId}/architecture`);
   },
 };
 

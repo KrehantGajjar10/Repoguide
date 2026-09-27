@@ -20,21 +20,65 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { repositoryService } from '../services/repositoryService';
+import { repoSession } from '../services/repoSession';
 import type { ProjectOverviewData } from '../types';
+import type { BackendOverview } from '../services/repositoryService';
+
+// ---------------------------------------------------------------------------
+// Map BackendOverview → ProjectOverviewData shape the existing UI expects
+// ---------------------------------------------------------------------------
+function mapOverview(b: BackendOverview): ProjectOverviewData {
+  const repo = {
+    id: b.repository_id,
+    name: b.repository_name,
+    branch: b.default_branch ?? 'main',
+    url: b.repository_url,
+    stack: b.technologies,
+    lastAnalyzed: 'Just analyzed',
+  };
+  return {
+    repository: repo,
+    commitHash: b.commit_hash,
+    description: b.description,
+    metrics: b.metrics as ProjectOverviewData['metrics'],
+    architectureLayers: b.architecture_layers as ProjectOverviewData['architectureLayers'],
+    techStack: b.tech_stack as ProjectOverviewData['techStack'],
+    keyModules: b.key_modules,
+    fileTree: { name: b.repository_name, type: 'folder', children: [] },
+  };
+}
 
 export const ProjectOverviewPage: React.FC = () => {
   const navigate = useNavigate();
   const [data, setData] = useState<ProjectOverviewData | null>(null);
-  const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({
-    'campus-connect': true,
-    'frontend': true,
-    'backend': true,
-    'tests': true,
-  });
+  const [topLevelDirs, setTopLevelDirs] = useState<string[]>([]);
+  const [repoDisplayName, setRepoDisplayName] = useState<string>('');
+  const [fileTreeCount, setFileTreeCount] = useState<number>(0);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
+
+  const repoId = repoSession.get();
 
   useEffect(() => {
-    repositoryService.getProjectOverview().then(setData);
-  }, []);
+    if (repoId) {
+      repositoryService.getRepositoryOverview(repoId)
+        .then((b) => {
+          setData(mapOverview(b));
+          setTopLevelDirs(b.top_level_dirs ?? []);
+          setRepoDisplayName(b.repository_name);
+          setFileTreeCount(b.file_count);
+          // Expand first 3 dirs by default
+          const expanded: Record<string, boolean> = { [b.repository_name]: true };
+          (b.top_level_dirs ?? []).slice(0, 3).forEach((d) => { expanded[d] = true; });
+          setExpandedFolders(expanded);
+        })
+        .catch((err) => {
+          setLoadError(err instanceof Error ? err.message : 'Failed to load overview.');
+        });
+    } else {
+      repositoryService.getProjectOverview().then(setData);
+    }
+  }, [repoId]);
 
   const toggleFolder = (path: string) => {
     setExpandedFolders((prev) => ({
@@ -42,6 +86,17 @@ export const ProjectOverviewPage: React.FC = () => {
       [path]: !prev[path],
     }));
   };
+
+  if (loadError) {
+    return (
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-sm text-muted-foreground font-mono text-center">
+          <span className="text-destructive">{loadError}</span>
+          <span className="text-xs">Analysis may not be complete yet. Return to analysis and wait for it to finish.</span>
+        </div>
+      </main>
+    );
+  }
 
   if (!data) {
     return (
@@ -331,130 +386,45 @@ export const ProjectOverviewPage: React.FC = () => {
               </Link>
             </div>
 
-            {/* File Tree Terminal Container */}
+            {/* File Tree Terminal Container — dynamic from real analysis */}
             <div className="rounded-lg border border-border bg-background p-4 font-mono text-xs overflow-x-auto text-muted-foreground">
-              {/* Root */}
-              <div
-                className="flex items-center gap-1.5 text-foreground mb-2 font-medium cursor-pointer"
-                onClick={() => toggleFolder('campus-connect')}
-              >
-                <FolderOpen className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span>campus-connect/</span>
-              </div>
+              {repoId && topLevelDirs.length === 0 ? (
+                <div className="text-muted-foreground">No directory structure available.</div>
+              ) : (
+                <>
+                  {/* Root */}
+                  <div
+                    className="flex items-center gap-1.5 text-foreground mb-2 font-medium cursor-pointer"
+                    onClick={() => toggleFolder(repoId ? repoDisplayName : 'campus-connect')}
+                  >
+                    <FolderOpen className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <span>{repoId ? repoDisplayName : 'campus-connect'}/</span>
+                  </div>
 
-              {expandedFolders['campus-connect'] && (
-                <div className="pl-4 border-l border-border ml-2 flex flex-col gap-1.5">
-                  {/* Frontend */}
-                  <div>
-                    <div
-                      className="flex items-center gap-1.5 text-foreground/90 hover:text-foreground cursor-pointer transition-colors"
-                      onClick={() => toggleFolder('frontend')}
-                    >
-                      <Folder className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      <span>frontend/</span>
+                  {expandedFolders[repoId ? repoDisplayName : 'campus-connect'] !== false && (
+                    <div className="pl-4 border-l border-border ml-2 flex flex-col gap-1.5">
+                      {(repoId ? topLevelDirs : ['frontend', 'backend', 'tests']).map((dir) => (
+                        <div key={dir}>
+                          <div
+                            className="flex items-center gap-1.5 text-foreground/90 hover:text-foreground cursor-pointer transition-colors"
+                            onClick={() => toggleFolder(dir)}
+                          >
+                            <Folder className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                            <span>{dir}/</span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    {expandedFolders['frontend'] && (
-                      <div className="pl-4 border-l border-border ml-1.5 mt-1 flex flex-col gap-1">
-                        <div className="flex items-center gap-1.5 text-muted-foreground">
-                          <Folder className="w-3.5 h-3.5 text-muted-foreground/70 shrink-0" />
-                          <span>src/</span>
-                        </div>
-                        <div className="pl-4 border-l border-border ml-1.5 flex flex-col gap-1">
-                          <div className="flex items-center gap-1.5 text-muted-foreground/80">
-                            <Folder className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
-                            <span>components/</span>
-                          </div>
-                          <div className="flex items-center gap-1.5 text-muted-foreground/80">
-                            <Folder className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
-                            <span>pages/</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-muted-foreground/80">
-                          <FileCode className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
-                          <span>package.json</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Backend */}
-                  <div>
-                    <div
-                      className="flex items-center gap-1.5 text-foreground/90 hover:text-foreground cursor-pointer transition-colors mt-1"
-                      onClick={() => toggleFolder('backend')}
-                    >
-                      <Folder className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      <span>backend/</span>
-                    </div>
-                    {expandedFolders['backend'] && (
-                      <div className="pl-4 border-l border-border ml-1.5 mt-1 flex flex-col gap-1">
-                        <div className="flex items-center gap-1.5 text-muted-foreground">
-                          <Folder className="w-3.5 h-3.5 text-muted-foreground/70 shrink-0" />
-                          <span>app/</span>
-                        </div>
-                        <div className="pl-4 border-l border-border ml-1.5 flex flex-col gap-1">
-                          <div className="flex items-center gap-1.5 text-muted-foreground/80">
-                            <Folder className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
-                            <span>api/</span>
-                          </div>
-                          <div className="flex items-center gap-1.5 text-muted-foreground/80">
-                            <Folder className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
-                            <span>services/</span>
-                          </div>
-                          <div className="flex items-center gap-1.5 text-muted-foreground/80">
-                            <Folder className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
-                            <span>models/</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-muted-foreground/80">
-                          <FileCode className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
-                          <span>main.py</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Tests */}
-                  <div>
-                    <div
-                      className="flex items-center gap-1.5 text-foreground/90 hover:text-foreground cursor-pointer transition-colors mt-1"
-                      onClick={() => toggleFolder('tests')}
-                    >
-                      <Folder className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      <span>tests/</span>
-                    </div>
-                    {expandedFolders['tests'] && (
-                      <div className="pl-4 border-l border-border ml-1.5 mt-1 flex flex-col gap-1 text-muted-foreground/80">
-                        <div className="flex items-center gap-1.5">
-                          <FileCode className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
-                          <span>test_api.py</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <FileCode className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
-                          <span>test_events.py</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Root files */}
-                  <div className="flex items-center gap-1.5 text-muted-foreground/80 mt-1">
-                    <FileCode className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
-                    <span>docker-compose.yml</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-muted-foreground/80">
-                    <FileCode className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
-                    <span>README.md</span>
-                  </div>
-                </div>
+                  )}
+                </>
               )}
             </div>
 
             <div className="flex items-center justify-between text-xs font-mono text-muted-foreground px-1">
               <span>
-                Branch: <span className="text-foreground font-medium">main</span>
+                Branch: <span className="text-foreground font-medium">{repoId ? (data?.repository.branch ?? '—') : 'main'}</span>
               </span>
-              <span>42 files in tree</span>
+              <span>{repoId ? `${fileTreeCount} files` : '42 files in tree'}</span>
             </div>
           </section>
 
